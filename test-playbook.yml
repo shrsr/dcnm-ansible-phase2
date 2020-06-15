@@ -1,0 +1,120 @@
+---
+- name: test dcnm module
+  hosts: localhost
+  vars:
+    api_info: &api_info
+      baseurl: https://172.25.74.49/rest
+      u: "admin"
+      p: "Cisco12345!"
+      verify: no
+  tasks:
+    - name: dcnm_facts
+      dcnm_facts:
+        <<: *api_info
+
+    - name: import switch
+      switch:
+        <<: *api_info
+        fabric_name: Demo
+        username: "admin"
+        password: "Cisco123!"
+        sw:
+          - reachable: "True"
+            auth: "True"
+            known: "True"
+            valid: "True"
+            selectable: "true"
+            sysName: "leaf"
+            ipaddr: "172.25.74.58"
+            platform: "N9K-9000v"
+            version: "9.2(3)"
+            lastChange: ""
+            hopCount: 0
+            deviceIndex: "leaf(9NCHKKHXDBN)"
+            statusReason: "" 
+            
+
+
+
+      
+        
+    - name: create/update VRF
+      dcnm_vrf:
+        <<: *api_info
+        fabric_name: Demo
+        vrf_name: vrf1
+        vrf_template_config: 
+          nveId: "1"
+          vrfVlanId: "3"
+          asn: "65000"
+          vrfName: "vrf1"
+          vrfSegmentId: "50001"
+        vrf_id: 50001
+        state: present
+
+   
+    - name: attach VRF
+      dcnm_vrf2:
+        <<: *api_info 
+        fabric_name: Demo
+        vrf_name: "vrf1"
+        lan_AttachList:
+                  - fabric: Demo
+                    vrfName: "vrf1"
+                    serialNumber: "9NCHKKHXDBN"
+                    vlan: 200
+                    deployment: "true"
+                    extensionValues: ""
+                    instanceValues: ""
+                    freeformConfig: ""
+
+    - pause:
+        seconds: 15
+
+    - name: deploy VRF
+      dcnm_vrf3:
+        <<: *api_info 
+        fabric_name: Demo
+        vrf_name: "vrf1"
+
+                
+    - name: create/update network
+      dcnm_network:
+        <<: *api_info
+        fabric_name: Demo
+        network_name: "net1"
+        vrf_name: vrf1
+        network_id: 30000
+        network_template_config:
+          mcastGroup: "239.1.1.0"
+          vrfName: "vrf1"
+          nveId: "1"
+          gatewayIpAddress: "10.3.3.1/24"
+          segmentId: "30000"
+          intfDescription: ""
+          vlanName: ""
+          secondaryGW1: ""
+          secondaryGW2: ""
+          vlanId: "300"
+          networkName: "net1"
+          suppressArp: "true"
+          isLayer2Only: "false"
+          # mtu: ""
+          # dhcpServerAddr1: ""
+          # dhcpServerAddr2: ""
+          # rtBothAuto: "false"
+          # loopbackId: ""
+          # gatewayIpV6Address: ""
+          # vrfDhcp: ""
+          # enableL3OnBorder: "false"
+          # tag: "12345"
+          # enableIR: "false"
+          # trmEnabled: "false"
+        state: present
+
+        
+
+  
+
+    
+        
